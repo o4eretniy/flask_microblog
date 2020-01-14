@@ -29,3 +29,5 @@ Traceback (most recent call last):
     user. User.query.filter_by(username=self.username.data).first()
 NameError: global name 'user' is not defined
 2020-01-10 19:31:11,666 INFO: Microblog startup [in /home/o4eretniy/PyProject/flask_microblog/app/__init__.py:43]
+2020-01-10 20:39:38,153 INFO: Microblog startup [in /home/o4eretniy/PyProject/flask_microblog/app/__init__.py:43]
+2020-01-10 20:39:49,546 INFO: Microblog startup [in /home/o4eretniy/PyProject/flask_microblog/app/__init__.py:43]
