@@ -1,0 +1,36 @@
+<table>
+    <tr>
+        <td width='75px'>
+            {% if current_user.has_liked_post(post) %}
+            <a href="{{ url_for('like_action', post_id=post.id, action='unlike') }}" title="You're liked this post">
+                <button type="button" class="btn btn-default" aria-label="Left Align">
+                    <span class="glyphicon glyphicon-thumbs-up" style="color:blue" aria-hidden="true"></span>
+                </button>
+            </a>
+            {% else %}
+            <a href="{{ url_for('like_action', post_id=post.id, action='like') }}">
+                <button type="button" class="btn btn-default" aria-label="Left Align">
+                    <span class="glyphicon glyphicon-thumbs-up" style="color:black" aria-hidden="true"></span>
+                </button>
+            </a> 
+        {% endif %}
+        {{ post.likes.count() }}
+        </td>
+        <td width='75px'>
+            {% if current_user.has_disliked_post(post) %}
+            <a href="{{ url_for('like_action', post_id=post.id, action='undislike') }}" title="You're disliked this post">
+                <button type="button" class="btn btn-default" aria-label="Left Align">
+                    <span class="glyphicon glyphicon-thumbs-down" style="color:blue" aria-hidden="true"></span>
+                </button>
+            </a>
+            {% else %}
+            <a href="{{ url_for('like_action', post_id=post.id, action='dislike') }}">
+                <button type="button" class="btn btn-default" aria-label="Left Align">
+                    <span class="glyphicon glyphicon-thumbs-down" style="color:black" aria-hidden="true"></span>
+                </button>
+            </a> 
+        {% endif %}
+        {{ post.dislikes.count() }}
+        </td>
+    </tr>
+</table>

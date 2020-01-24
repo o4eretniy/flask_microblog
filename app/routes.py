@@ -123,7 +123,7 @@ def edit_profile():
         current_user.about_me = form.about_me.data
         db.session.commit()
         flash(_('Your change have been saved.'))
-        return redirect(url_for('edit_profile'))
+        return redirect(url_for('user'))
     elif request.method == 'GET':
         form.username.data = current_user.username
         form.about_me.data = current_user.about_me
@@ -159,6 +159,29 @@ def unfollow(username):
     db.session.commit()
     flash(_('Are you not following %(username)s.', username=username))
     return redirect(url_for('user', username=username))
+
+@app.route('/like/<int:post_id>/<action>')
+@login_required
+def like_action(post_id, action):
+    post = Post.query.filter_by(id=post_id).first_or_404()
+    if action == 'like':
+        if current_user.has_disliked_post(post):
+            current_user.undislike_post(post)
+        current_user.like_post(post)
+        db.session.commit()
+    if action == 'unlike':
+        current_user.unlike_post(post)
+        db.session.commit()
+    if action == 'dislike':
+        if current_user.has_liked_post(post):
+            current_user.unlike_post(post)
+        current_user.dislike_post(post)
+        db.session.commit()
+    if action == 'undislike':
+        current_user.undislike_post(post)
+        db.session.commit()
+    return redirect(url_for('blog'))
+
 
 @app.route('/reset_password_request', methods=['GET', 'POST'])
 def reset_password_request():
