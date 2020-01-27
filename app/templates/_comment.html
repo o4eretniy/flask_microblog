@@ -1,0 +1,22 @@
+<div class="row">
+    <div class='col-sm-1'>
+        <div class='thumbnail'>
+            <a href="{{ url_for('user', username=comment.author.username) }}">
+                <img src="{{ url_for('static', filename='avatars/' + comment.author.image_file) }}" class="img-circle" width="70" height="70" style="border:1px solid black">
+            </a>
+        </div>
+    </div>
+    <div class='col-sm-5'>
+        <div class='panel panel-default'>
+            <div class='panel-heading'>
+                <a href="{{ url_for('user', username=comment.author.username) }}">    
+                    <strong>{{ comment.author.username }}</strong>
+                    <span class='text-muted'>{{ moment(comment.timestamp).fromNow() }}</span>
+                </a>
+            </div>
+            <div class='panel-body'>
+                {{ comment.body }}
+            </div>
+        </div>
+    </div>
+</div>

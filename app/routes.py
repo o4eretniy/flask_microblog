@@ -1,11 +1,11 @@
 import os
 import secrets
 from PIL import Image
-from flask import render_template, flash, redirect, url_for, request
+from flask import render_template, flash, redirect, url_for, request, current_app
 from app import app, db
-from app.forms import LoginForm, RegistrationForm, EditProfileForm, PostForm, ResetPasswordRequestForm, ResetPasswordForm
+from app.forms import LoginForm, RegistrationForm, EditProfileForm, PostForm, CommentForm, ResetPasswordRequestForm, ResetPasswordForm
 from app.email import send_password_reset_email
-from app.models import User, Post
+from app.models import User, Post, Comment
 from flask_login import current_user, login_user, logout_user, login_required
 from flask_babel import _
 from werkzeug.urls import url_parse
@@ -32,6 +32,28 @@ def blog():
     return render_template('blog.html', title='Home Page', form=form,
                             posts=posts.items, next_url=next_url,
                             prev_url=prev_url)
+
+@app.route('/post/<int:id>', methods=['GET', 'POST'])
+def post(id):
+    post = Post.query.get_or_404(id)
+    form = CommentForm()
+    if form.validate_on_submit():
+        comment = Comment(body=form.comment.data,
+                          post=post,
+                          author=current_user)
+        db.session.add(comment)
+        db.session.commit()
+        flash('Your comment has been added.')
+        return redirect(url_for('post', id=post.id))
+    page = request.args.get('page', 1, type=int)
+    comments = post.comments_for_post().paginate(
+        page, app.config['POSTS_PER_PAGE'], False)
+    next_url = url_for('post', page=comments.next_num) \
+        if comments.has_next else None
+    prev_url = url_for('post', page=comments.prev_num) \
+        if comments.has_prev else None
+    return render_template('post.html', post=post, form=form,
+                           comments=comments.items, next_url=next_url, prev_url=prev_url)
 
 @app.route('/explore')
 @login_required

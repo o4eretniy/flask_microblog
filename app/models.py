@@ -6,10 +6,6 @@ from time import time
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 from hashlib import md5
-import sys
-
-reload(sys)
-sys.setdefaultencoding('utf8')
 
 @login.user_loader
 def load_user(id):
@@ -27,7 +23,7 @@ class User(UserMixin ,db.Model):
     email = db.Column(db.String(128), index=True, unique=True)
     password_hash = db.Column(db.String(128))
     posts = db.relationship('Post', backref='author', lazy='dynamic')
-    about_me = db.Column(db.String(256))
+    about_me = db.Column(db.Text)
     image_file = db.Column(db.String(20), nullable=False, default='default.png')
     last_seen = db.Column(db.DateTime, default=datetime.utcnow)
     followed = db.relationship(
@@ -35,6 +31,7 @@ class User(UserMixin ,db.Model):
         primaryjoin=(followers.c.follower_id==id),
         secondaryjoin=(followers.c.followed_id==id),
         backref=db.backref('followers', lazy='dynamic'), lazy='dynamic')
+    comments = db.relationship('Comment', backref='author', lazy='dynamic')
     liked = db.relationship(
         'PostLike',
         foreign_keys='PostLike.user_id',
@@ -43,7 +40,7 @@ class User(UserMixin ,db.Model):
         'PostDislike',
         foreign_keys='PostDislike.user_id',
         backref='user', lazy='dynamic')
-
+    
     def __repr__(self):
         return '<User {}>'.format(self.username)
 
@@ -120,14 +117,28 @@ class User(UserMixin ,db.Model):
 
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    body = db.Column(db.String(1024))
+    body = db.Column(db.Text)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    comments = db.relationship('Comment', backref='post', lazy='dynamic')
     likes = db.relationship('PostLike', backref='post', lazy='dynamic')
     dislikes = db.relationship('PostDislike', backref='post', lazy='dynamic')
-
+    
     def __repr__(self):
         return '<Posts {}>'.format(self.body)
+
+    def comments_for_post(self):
+        post = Comment.query.join(Post, Post.user_id == Comment.post_id).filter(
+                                  Post.id == self.id)
+        own = Comment.query.filter_by(post_id=self.id)
+        return post.union(own).order_by(Comment.timestamp.desc())
+
+class Comment(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    body = db.Column(db.Text)
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    post_id = db.Column(db.Integer, db.ForeignKey('post.id'))
 
 class PostLike(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -138,3 +149,7 @@ class PostDislike(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     post_id = db.Column(db.Integer, db.ForeignKey('post.id'))
+
+import sys
+reload(sys)
+sys.setdefaultencoding('utf8')

@@ -33,7 +33,7 @@ class EditProfileForm(FlaskForm):
     username = StringField(_l('Username'), validators=[DataRequired()])
     about_me = TextAreaField(_l('About me'), validators=[Length(min=0, max=256)])
     picture = FileField('Profile Picture', validators=[FileAllowed(['jpg', 'png'])])
-    submit = SubmitField(_l('Submit'))
+    submit = SubmitField(_l('Change'))
 
     def __init__(self, original_username, *args, **kwargs):
         super(EditProfileForm, self).__init__(*args, **kwargs)
@@ -48,7 +48,11 @@ class EditProfileForm(FlaskForm):
 class PostForm(FlaskForm):
     post = TextAreaField(_l('Say something'), validators=[
         DataRequired(), Length(min=1, max=140)])
-    submit = SubmitField(_l('Submit'))
+    submit = SubmitField(_l('Post'))
+
+class CommentForm(FlaskForm):
+    comment = StringField(_l(''), validators=[DataRequired()])
+    submit = SubmitField(_l('Comment'))
 
 class ResetPasswordRequestForm(FlaskForm):
     email = StringField(_l('Email'), validators=[DataRequired(), Email()])
